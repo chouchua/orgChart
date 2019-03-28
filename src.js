@@ -29,6 +29,8 @@ d3.json(params.dataLoadUrl, function (data) {
 function drawOrganizationChart(params) {
     listen();
 
+    //custom
+    params.funcs.editPersonClick = editPersonClick;
     params.funcs.showMySelf = showMySelf;
     params.funcs.expandAll = expandAll;
     params.funcs.search = searchUsers;
@@ -120,6 +122,11 @@ function drawOrganizationChart(params) {
         .append('div')
         .attr('class', 'customTooltip-wrapper');
 
+    /**
+     * update each node with ...
+     * @param {*} source 
+     * @param {*} param 
+     */
     function update(source, param) {
 
         // Compute the new tree layout.
@@ -137,7 +144,8 @@ function drawOrganizationChart(params) {
             .data(nodes, function (d) {
                 return d.id || (d.id = ++attrs.index);
             });
-
+        console.log("node");
+        console.log(node);
         // Enter any new nodes at the parent's previous position.
         var nodeEnter = node.enter()
             .append("g")
@@ -148,8 +156,8 @@ function drawOrganizationChart(params) {
 
         var nodeGroup = nodeEnter.append("g")
             .attr("class", "node-group")
-
-
+        console.log('creating node');
+        console.log(nodeGroup);
         nodeGroup.append("rect")
             .attr("width", attrs.nodeWidth)
             .attr("height", attrs.nodeHeight)
@@ -207,7 +215,7 @@ function drawOrganizationChart(params) {
                 return d.collapseText;
             })
 
-        collapsiblesWrapper.on("click", click);
+        collapsiblesWrapper.on("click", clickPlus);
 
         nodeGroup.append("text")
             .attr("x", dynamic.nodeTextLeftMargin)
@@ -385,12 +393,6 @@ function drawOrganizationChart(params) {
                 }
             });
 
-
-
-
-
-
-
             // normalize for width/height
             var new_x = (-x + (window.innerWidth / 2));
             var new_y = (-y + (window.innerHeight / 2));
@@ -431,8 +433,12 @@ function drawOrganizationChart(params) {
             }).join('');
         }
 
+        /**
+         * helper for tooltip event binding function
+         * @param {*} item 
+         */
         function tooltipContent(item) {
-
+            console.log(item);
             var strVar = "";
 
             strVar += "  <div class=\"customTooltip\">";
@@ -449,6 +455,9 @@ function drawOrganizationChart(params) {
             strVar += "";
             strVar += "      <p class=\"office\">" + item.office + "<\/p>";
             strVar += "     <button class='" + (item.unit.type == 'business' ? " disabled " : "") + " btn btn-tooltip-department' onclick='params.funcs.departmentClick(" + JSON.stringify(item.unit) + ")'>" + item.unit.value + "</button>";
+            // strVar += "     <button class='" + (item.unit.type == 'business' ? " disabled " : "") + " btn btn-tooltip-department' onclick='params.funcs.editPersonClick(" + JSON.stringify(item) + ")'>" + "Edit Information" + "</button>";
+            strVar += "     <button class='" + (item.unit.type == 'business' ? " disabled " : "") + " btn btn-tooltip-department' onclick='params.funcs.editPersonClick()'>" + "Edit Information" + "</button>";
+            strVar += "     <button class='" + (item.unit.type == 'business' ? " disabled " : "") + " btn btn-tooltip-department' onclick='params.funcs.rrTest'>" + "fffffadfasd" + "</button>";
             strVar += "      <h4 class=\"tags-wrapper\">             <span class=\"title\"><i class=\"fa fa-tags\" aria-hidden=\"true\"><\/i>";
             strVar += "        ";
             strVar += "        <\/span>           <ul class=\"tags\">" + getTagsFromCommaSeparatedStrings(item.tags) + "<\/ul>         <\/h4> <\/div>";
@@ -460,11 +469,16 @@ function drawOrganizationChart(params) {
 
         }
 
-        function tooltipHoverHandler(d) {
+        /**
+         * click on employee handler
+         * @param {*} d the employee selected
+         */
+        function tooltipClickHandler(d) {
 
             var content = tooltipContent(d);
+            console.log(content);
             tooltip.html(content);
-
+            tooltip.currentEmployee = d;
             tooltip.transition()
                 .duration(200).style("opacity", "1").style('display', 'block');
             d3.select(this).attr('cursor', 'pointer').attr("stroke-width", 50);
@@ -494,7 +508,8 @@ function drawOrganizationChart(params) {
 
         }
 
-        nodeGroup.on('click', tooltipHoverHandler);
+        //applies to all nodes
+        nodeGroup.on('click', tooltipClickHandler);
 
         nodeGroup.on('dblclick', tooltipOutHandler);
 
@@ -512,10 +527,10 @@ function drawOrganizationChart(params) {
     }
 
     // Toggle children on click.
-    function click(d) {
-
+    function clickPlus(d) {
+        console.log(d);
         d3.select(this).select("text").text(function (dv) {
-
+            console.log(dv);
             if (dv.collapseText == attrs.EXPAND_SYMBOL) {
                 dv.collapseText = attrs.COLLAPSE_SYMBOL
             } else {
@@ -601,6 +616,22 @@ function drawOrganizationChart(params) {
         }
     }
 
+    function rrTest() {
+        console.log(this);
+    }
+
+    /**
+     * 
+     * @param {*} employee the json of employee
+     */
+    function editPersonClick(employee) {
+        console.log('editing....');
+        console.log(employee);
+        console.log(tooltip.currentEmployee);
+        // console.log(params.pristinaData);
+        params.pristinaData.children;
+    }
+
     function departmentClick(item) {
         hide(['.customTooltip-wrapper']);
 
@@ -659,6 +690,10 @@ function drawOrganizationChart(params) {
         }
     }
 
+    /**
+     * function used in search function. generate html for a node
+     * @param {*} results 
+     */
     function reflectResults(results) {
         var htmlStringArray = results.map(function (result) {
             var strVar = "";
@@ -700,6 +735,9 @@ function drawOrganizationChart(params) {
 
     }
 
+    /**
+     * event listeners are registered here
+     */
     function listen() {
         var input = get('.user-search-box .search-input');
 
@@ -716,7 +754,7 @@ function drawOrganizationChart(params) {
     }
 
     function searchUsers() {
-
+        console.log("searching")
         d3.selectAll('.user-search-box')
             .transition()
             .duration(250)
@@ -735,6 +773,11 @@ function drawOrganizationChart(params) {
 
     }
 
+    /**
+     * find a user in the tree
+     * @param {*} rootElement 
+     * @param {*} searchText 
+     */
     function findInTree(rootElement, searchText) {
         var result = [];
         // use regex to achieve case insensitive search and avoid string creation using toLowerCase method
