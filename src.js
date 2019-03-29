@@ -1,7 +1,7 @@
 
 var params = {
     selector: "#svgChart",
-    dataLoadUrl: "https://raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Organization%20Chart/redesignedChartLongData.json",
+    dataLoadUrl: "./data.json",
     chartWidth: window.innerWidth - 40,
     chartHeight: window.innerHeight - 40,
     funcs: {
@@ -76,7 +76,7 @@ function drawOrganizationChart(params) {
     var tree = d3.layout.tree().nodeSize([attrs.nodeWidth + 40, attrs.nodeHeight]);
     var diagonal = d3.svg.diagonal()
         .projection(function (d) {
-            debugger;
+            // debugger;
             return [d.x + attrs.nodeWidth / 2, d.y + attrs.nodeHeight / 2];
         });
 
@@ -118,10 +118,11 @@ function drawOrganizationChart(params) {
 
     d3.select(attrs.selector).style("height", attrs.height);
 
+    //tooltip html reference
     var tooltip = d3.select('body')
         .append('div')
         .attr('class', 'customTooltip-wrapper');
-
+    
     /**
      * update each node with ...
      * @param {*} source 
@@ -474,7 +475,7 @@ function drawOrganizationChart(params) {
          * @param {*} d the employee selected
          */
         function tooltipClickHandler(d) {
-
+            //create html content
             var content = tooltipContent(d);
             console.log(content);
             tooltip.html(content);
@@ -621,6 +622,12 @@ function drawOrganizationChart(params) {
     }
 
     /**
+     * todo
+     */
+    function editEmployeeContent() {
+        return "<div>hi</div>"
+    }
+    /**
      * 
      * @param {*} employee the json of employee
      */
@@ -628,8 +635,13 @@ function drawOrganizationChart(params) {
         console.log('editing....');
         console.log(employee);
         console.log(tooltip.currentEmployee);
+        var content = editEmployeeContent();
+        console.log(content);
+        //1. use tootip variable
+        tooltip.html(content);
+
         // console.log(params.pristinaData);
-        params.pristinaData.children;
+        // params.pristinaData.children;
     }
 
     function departmentClick(item) {
